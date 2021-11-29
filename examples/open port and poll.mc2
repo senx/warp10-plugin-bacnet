@@ -1,0 +1,26 @@
+
+BACnetIsOpened !
+<% 
+  {
+    'port' '/dev/ttyUSB1'
+    'baudrate' 19200
+    'databits' 8
+    'stopbits' 1
+    'parity' 'none'
+  } BACnetOpenLocalDevice
+%> IFT
+
+// note : if the port is unplugged, it will be detected and safely closed within 10 seconds
+// by the plugin.
+
+// open device #620001  with a 15000 millisecond timeout
+620001 15000 BACnetOpenRemoteDevice  'remoteDevice' STORE
+
+{
+ "V101" "analogInput" 101 BACnetBuildObjectId
+ "V102" "analogInput" 102 BACnetBuildObjectId
+ "V105" "analogInput" 105 BACnetBuildObjectId
+ "V201" "analogInput" 201 BACnetBuildObjectId
+ "V202" "analogInput" 202 BACnetBuildObjectId
+ "V205" "analogInput" 205 BACnetBuildObjectId
+}

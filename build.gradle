@@ -35,6 +35,9 @@ project.version = versioning.info.lastTag + ((versioning.info.tag != null) ? '' 
 
 repositories {
   mavenCentral()
+  maven {
+    url "https://maven.mangoautomation.net/repository/ias-release"
+  }
 }
 
 //
@@ -52,6 +55,9 @@ dependencies {
 
   // Compile time only dependencies, not used at runtime, or provided by other dependencies.
   compileOnly group: 'io.warp10', name: 'warpscript', version: '2.+'
+
+  // bacnet
+  implementation "com.infiniteautomation:bacnet4j:6.0.0"
 }
 
 java {
@@ -83,6 +89,8 @@ jar {
 
 shadowJar {
   archiveClassifier.set('uberjar')
+
+  shadowJar.archiveName = 'bacnetplugin.jar'
 
   from('src/main/warpscript') {
     //
