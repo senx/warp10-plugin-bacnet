@@ -1,0 +1,15 @@
+{
+  "type": "plugin",
+  "group": "fr.couincouin",
+  "artifact": "bacnet-plugin",
+  "version": "0.0.1",
+  "description": "BACNet plugin for Warp 10",
+  "author": "Pierre Papin",
+  "email": "pierre@couincouin.fr",
+  "license": "GPL",
+  "git": "pi-r-p/bacnet-extension",
+  "repoUrl": "todo",
+  "tags": [
+    "iot"
+  ]
+}
