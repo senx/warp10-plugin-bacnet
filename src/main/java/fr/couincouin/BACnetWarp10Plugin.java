@@ -169,9 +169,6 @@ public class BACnetWarp10Plugin extends AbstractWarp10Plugin implements Runnable
         }
 
         for (int i = 0; i < readAccessResults.size(); i++) {
-          System.out.println("access result:" + readAccessResults.get(i).getObjectIdentifier().toString());
-          //System.out.println("access result:" + readAccessResults.get(i).getObjectIdentifier().toString());
-
           for (ReadAccessResult.Result r: readAccessResults.get(i).getListOfResults()) {
             Map props = new LinkedHashMap();
             props.put(PropertyIdentifier.nameForId(r.getPropertyIdentifier().intValue()), r.getReadResult().toString());
@@ -201,27 +198,15 @@ public class BACnetWarp10Plugin extends AbstractWarp10Plugin implements Runnable
         try {
           ReadPropertyMultipleAck send = localDevice.send(remoteDevice, multipleRequest).get();
           SequenceOf<ReadAccessResult> readAccessResults = send.getListOfReadAccessResults();
-
           Map props = new LinkedHashMap();
-
-
           for (ReadAccessResult result: readAccessResults) {
-            System.out.println("access result:" + result.getObjectIdentifier().toString());
             SequenceOf<ReadAccessResult.Result> listResults = result.getListOfResults();
             for (int j = 0; j < listResults.size(); j++) {
-              System.out.println(listResults.get(j));
               ReadAccessResult.Result r = listResults.get(j);
-              System.out.println(PropertyIdentifier.nameForId(r.getPropertyIdentifier().intValue()));
-              System.out.println(r.getReadResult());
-              System.out.println(r.getReadResult().toString());
               props.put(PropertyIdentifier.nameForId(r.getPropertyIdentifier().intValue()), r.getReadResult().toString());
-
-
             }
           }
-
           results.put(requestUserName, props);
-
         } catch (Exception ex) {
           throw new WarpScriptException(ex);
         }
@@ -295,6 +280,5 @@ public class BACnetWarp10Plugin extends AbstractWarp10Plugin implements Runnable
       }
     }
   }
-
-
+  
 }
