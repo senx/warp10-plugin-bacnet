@@ -1,3 +1,4 @@
+// @endpoint http://localhost:8080/api/v0/exec
 
 BACnetIsOpened !
 <% 
@@ -16,11 +17,39 @@ BACnetIsOpened !
 // open device #620001  with a 15000 millisecond timeout
 620001 15000 BACnetOpenRemoteDevice  'remoteDevice' STORE
 
+true 'showAllBacnetProperties' STORE
+
+$remoteDevice
 {
- "V101" "analogInput" 101 BACnetBuildObjectId
- "V102" "analogInput" 102 BACnetBuildObjectId
- "V105" "analogInput" 105 BACnetBuildObjectId
- "V201" "analogInput" 201 BACnetBuildObjectId
- "V202" "analogInput" 202 BACnetBuildObjectId
- "V205" "analogInput" 205 BACnetBuildObjectId
-}
+ "CurrentTemperatureZ1"   "analogValue" 101 BACnetBuildObjectId
+ "CurrentSetPointZ1"      "analogValue" 102 BACnetBuildObjectId
+ "CurrentTemperatureZ2"   "analogValue" 201 BACnetBuildObjectId
+ "CurrentSetPointZ2"      "analogValue" 202 BACnetBuildObjectId
+} $showAllBacnetProperties  BACnetReadObjects
+
+
+STOP 
+
+
+// after this first read, bench the read speed
+1 100 
+<%
+  DROP
+  'poll' CHRONOSTART
+  $remoteDevice
+  {
+  "V101"   "analogValue" 101 BACnetBuildObjectId
+  "V102"   "analogValue" 102 BACnetBuildObjectId
+  "V105"   "analogValue" 105 BACnetBuildObjectId
+  "V201"   "analogValue" 201 BACnetBuildObjectId
+  "V202"   "analogValue" 202 BACnetBuildObjectId
+  "V205"   "analogValue" 205 BACnetBuildObjectId 
+  }   BACnetReadObjects
+
+  'poll' CHRONOEND
+%> FOR
+
+CHRONOSTATS
+// total time 16506456955 ns 
+// 16506456955 ns 100 / HUMANDURATION  ~= 160 milliseconde par appels, quand appels successifs.
+

@@ -1,22 +1,5 @@
 package fr.couincouin;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.concurrent.locks.LockSupport;
-
-import io.warp10.script.WarpScriptException;
-import jssc.SerialPortList;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import io.warp10.script.WarpScriptLib;
-import io.warp10.warp.sdk.AbstractWarp10Plugin;
-
 import com.serotonin.bacnet4j.LocalDevice;
 import com.serotonin.bacnet4j.RemoteDevice;
 import com.serotonin.bacnet4j.npdu.Network;
@@ -34,8 +17,21 @@ import com.serotonin.bacnet4j.type.enumerated.ObjectType;
 import com.serotonin.bacnet4j.type.enumerated.PropertyIdentifier;
 import com.serotonin.bacnet4j.type.primitive.CharacterString;
 import com.serotonin.bacnet4j.type.primitive.ObjectIdentifier;
+import io.warp10.script.WarpScriptException;
+import io.warp10.script.WarpScriptLib;
+import io.warp10.warp.sdk.AbstractWarp10Plugin;
 import jssc.SerialPort;
-import jssc.SerialPortException;
+import jssc.SerialPortList;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.concurrent.locks.LockSupport;
 
 public class BACnetWarp10Plugin extends AbstractWarp10Plugin implements Runnable {
   private static final Logger LOG = LoggerFactory.getLogger(BACnetWarp10Plugin.class);
@@ -119,32 +115,37 @@ public class BACnetWarp10Plugin extends AbstractWarp10Plugin implements Runnable
   public ObjectIdentifier buildOjectIdentifier(String objectType, int instanceNumber) throws WarpScriptException {
     if (objectType.equalsIgnoreCase("analogInput")) {
       return new ObjectIdentifier(ObjectType.analogInput, instanceNumber);
-    } else if (objectType.equalsIgnoreCase("binaryInput")) {
-      return new ObjectIdentifier(ObjectType.binaryInput, instanceNumber);
-    } else if (objectType.equalsIgnoreCase("multiStateValue")) {
-      return new ObjectIdentifier(ObjectType.multiStateValue, instanceNumber);
     } else if (objectType.equalsIgnoreCase("analogOutput")) {
       return new ObjectIdentifier(ObjectType.analogOutput, instanceNumber);
+    } else if (objectType.equalsIgnoreCase("analogValue")) {
+      return new ObjectIdentifier(ObjectType.analogValue, instanceNumber);
+    } else if (objectType.equalsIgnoreCase("binaryInput")) {
+      return new ObjectIdentifier(ObjectType.binaryInput, instanceNumber);
     } else if (objectType.equalsIgnoreCase("binaryOutput")) {
       return new ObjectIdentifier(ObjectType.binaryOutput, instanceNumber);
+    } else if (objectType.equalsIgnoreCase("binaryValue")) {
+      return new ObjectIdentifier(ObjectType.binaryValue, instanceNumber);
     } else if (objectType.equalsIgnoreCase("multiStateInput")) {
       return new ObjectIdentifier(ObjectType.multiStateInput, instanceNumber);
     } else if (objectType.equalsIgnoreCase("multiStateOutput")) {
       return new ObjectIdentifier(ObjectType.multiStateOutput, instanceNumber);
+    } else if (objectType.equalsIgnoreCase("multiStateValue")) {
+      return new ObjectIdentifier(ObjectType.multiStateValue, instanceNumber);
     } else {
-      throw new WarpScriptException(objectType + " is not a supported object type, choose among analogInput, " +
-          "analogOutput, binaryInput, binaryOutput, multiStateValue, multiStateInput, multiStateOutput");
+      throw new WarpScriptException(objectType + " is not a supported object type, choose among " +
+          "(binary|analog|multiState)+(Input|Output|Value) " +
+          "ie : analogOutput, binaryInput, multiStateValue...");
     }
   }
 
-  public HashMap readRemoteDevice(RemoteDevice remoteDevice, HashMap<String, ObjectIdentifier> objMap, boolean valueOnly) throws WarpScriptException {
+  public Map readRemoteDevice(RemoteDevice remoteDevice, Map<String, ObjectIdentifier> objMap, boolean valueOnly) throws WarpScriptException {
     if (remoteDevice == null) {
       throw new WarpScriptException("remoteDevice cannot be null");
     }
     if (this.localDevice.getCachedRemoteDevice(remoteDevice.getInstanceNumber()) == null) {
       throw new WarpScriptException("remoteDevice unknown in localDevice cache");
     }
-    HashMap results = new LinkedHashMap<>();
+    Map results = new LinkedHashMap<>();
 
     if (valueOnly) {
       // read only present value
@@ -168,10 +169,12 @@ public class BACnetWarp10Plugin extends AbstractWarp10Plugin implements Runnable
         }
 
         for (int i = 0; i < readAccessResults.size(); i++) {
+          System.out.println("access result:" + readAccessResults.get(i).getObjectIdentifier().toString());
+          //System.out.println("access result:" + readAccessResults.get(i).getObjectIdentifier().toString());
 
           for (ReadAccessResult.Result r: readAccessResults.get(i).getListOfResults()) {
-            HashMap props = new LinkedHashMap();
-            props.put(PropertyIdentifier.nameForId(r.getPropertyIdentifier().intValue()), r.getReadResult());
+            Map props = new LinkedHashMap();
+            props.put(PropertyIdentifier.nameForId(r.getPropertyIdentifier().intValue()), r.getReadResult().toString());
             results.put(requestUserNameList.get(i), props);
           }
         }
@@ -199,12 +202,24 @@ public class BACnetWarp10Plugin extends AbstractWarp10Plugin implements Runnable
           ReadPropertyMultipleAck send = localDevice.send(remoteDevice, multipleRequest).get();
           SequenceOf<ReadAccessResult> readAccessResults = send.getListOfReadAccessResults();
 
-          HashMap props = new LinkedHashMap();
+          Map props = new LinkedHashMap();
+
+
           for (ReadAccessResult result: readAccessResults) {
-            for (ReadAccessResult.Result r: result.getListOfResults()) {
-              props.put(PropertyIdentifier.nameForId(r.getPropertyIdentifier().intValue()), r.getReadResult());
+            System.out.println("access result:" + result.getObjectIdentifier().toString());
+            SequenceOf<ReadAccessResult.Result> listResults = result.getListOfResults();
+            for (int j = 0; j < listResults.size(); j++) {
+              System.out.println(listResults.get(j));
+              ReadAccessResult.Result r = listResults.get(j);
+              System.out.println(PropertyIdentifier.nameForId(r.getPropertyIdentifier().intValue()));
+              System.out.println(r.getReadResult());
+              System.out.println(r.getReadResult().toString());
+              props.put(PropertyIdentifier.nameForId(r.getPropertyIdentifier().intValue()), r.getReadResult().toString());
+
+
             }
           }
+
           results.put(requestUserName, props);
 
         } catch (Exception ex) {
@@ -248,6 +263,7 @@ public class BACnetWarp10Plugin extends AbstractWarp10Plugin implements Runnable
     WarpScriptLib.addNamedWarpScriptFunction(new BACnetIsOpened("BACnetIsOpened", this));
     WarpScriptLib.addNamedWarpScriptFunction(new BACnetOpenRemoteDevice("BACnetOpenRemoteDevice", this));
     WarpScriptLib.addNamedWarpScriptFunction(new BACnetBuildObjectId("BACnetBuildObjectId", this));
+    WarpScriptLib.addNamedWarpScriptFunction(new BACnetReadObjects("BACnetReadObjects", this));
 
     Runtime.getRuntime().addShutdownHook(new Thread() {
       @Override
