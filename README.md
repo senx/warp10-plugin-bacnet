@@ -59,7 +59,7 @@ $remoteDevice
 Then compile, copy the jar and config file to the right place, and restart Warp 10: 
 ```bash
 ./gradlew shadowJar
-mv build/libs/bacnetplugin.jar /opt/warp10/lib/
+mv -f build/libs/warp10-plugin-bacnet.jar /opt/warp10/lib/
 cp io.warp10.plugins-bacnet-plugin.conf /opt/warp10/etc/conf.d/
 sudo systemctl restart warp10.service
 ```

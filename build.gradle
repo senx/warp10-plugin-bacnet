@@ -23,7 +23,7 @@ plugins {
   id 'io.github.gradle-nexus.publish-plugin' version '1.1.0'
 }
 
-project.group = 'fr.couincouin'
+project.group = 'io.warp10.plugins'
 project.description = 'BACNet plugin for Warp 10'
 
 // If the current tag is set, then it's a new release. Don't add build number
@@ -90,7 +90,7 @@ jar {
 shadowJar {
   archiveClassifier.set('uberjar')
 
-  shadowJar.archiveName = 'bacnetplugin.jar'
+  shadowJar.archiveName = 'warp10-plugin-bacnet.jar'
 
   from('src/main/warpscript') {
     //
