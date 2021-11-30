@@ -17,16 +17,19 @@ BACnetIsOpened ! // if not already opened...
 
 // open device #620001  with a 15000 millisecond timeout
 620001 15000 BACnetOpenRemoteDevice  'remoteDevice' STORE
+// the first call to BACnetOpenRemoteDevice is long and may fail. 
+// following calls to BACnetOpenRemoteDevice use a cache.
 
 true 'showAllBacnetProperties' STORE
 
 $remoteDevice
 {
- "CurrentTemperatureZ1"   "analogValue" 101 BACnetBuildObjectId
- "CurrentSetPointZ1"      "analogValue" 102 BACnetBuildObjectId
- "CurrentTemperatureZ2"   "analogValue" 201 BACnetBuildObjectId
- "CurrentSetPointZ2"      "analogValue" 202 BACnetBuildObjectId
+  "CurrentTemperatureZ1"   "analogValue" 101 BACnetBuildObjectId
+  "CurrentSetPointZ1"      "analogValue" 102 BACnetBuildObjectId
+  "CurrentTemperatureZ2"   "analogValue" 201 BACnetBuildObjectId
+  "CurrentSetPointZ2"      "analogValue" 202 BACnetBuildObjectId
 } $showAllBacnetProperties  BACnetReadObjects
+// will return a map with present-value and interesting properties for each object.
 
 
 STOP 
