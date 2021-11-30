@@ -9,12 +9,15 @@ There is very very very few documentation for BACnet4J, so the code is
 based on these examples: [1](https://github.com/MangoAutomation/BACnet4J/blob/master/src/test/java/com/serotonin/bacnet4j/adhoc/rs485/MasterTest.java) 
 [2](https://gist.github.com/splatch/3216feba4bcad3cfd741644552f93870).
 
-## Capabilities
+## Capabilities and limitations
 The plugin is designed to handle only one MS/TP BACNet port for the moment.
 
-Once opened, the port is monitored by the plugin. If the serial port is disconnected, 
+Once opened, the port is monitored by the plugin. If the serial port is disconnected, it will be closed within 10 seconds.
 
-Feel free to contribute !
+If you call `BACnetOpenLocalDevice` several times without checking the 
+port is opened (with `BACnetIsOpened`), you will close and re-initialize the port.
+
+Feel free to contribute to add multiple networks or BACnet over IP!
 
 ## Code example
 
