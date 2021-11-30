@@ -1,0 +1,58 @@
+// @endpoint http://localhost:8080/api/v0/exec
+// place this file in /opt/warp10/warpscript/xxx/10000 to run it every 10 seconds
+
+BACnetIsOpened ! // if not already opened...
+<% 
+  {
+    'port' '/dev/ttyUSB1'
+    'baudrate' 19200
+    'databits' 8
+    'stopbits' 1
+    'parity' 'none'
+  } BACnetOpenLocalDevice   // do not returns anything. Only one MS/TP network is supported. 
+                            // Feel free to contribute for multiple ports or IP :)
+%> IFT
+
+// note : if the port is unplugged, it will be detected and safely closed within 10 seconds
+// by the plugin.
+
+// open device #620001  with a 15000 millisecond timeout
+620001 15000 BACnetOpenRemoteDevice  'remoteDevice' STORE
+// the first call to BACnetOpenRemoteDevice is long and may fail. 
+// following calls to BACnetOpenRemoteDevice use a cache.
+
+
+$remoteDevice
+{
+  "CurrentTemperatureZ1"   "analogValue" 101 BACnetBuildObjectId
+  "CurrentSetPointZ1"      "analogValue" 102 BACnetBuildObjectId
+  "CurrentTemperatureZ2"   "analogValue" 201 BACnetBuildObjectId
+  "CurrentSetPointZ2"      "analogValue" 202 BACnetBuildObjectId
+} BACnetReadObjects
+// will return a map with present-value and interesting properties for each object.
+'result' STORE
+
+NOW 'currentTime' STORE
+
+// turn this into a gts list
+[] 'gtsList' STORE
+$result
+<% 
+  [ 'key' 'value' ] STORE // object is a map
+  
+  NEWGTS $key RENAME
+  { 'uuid' 'tempUUID' 'unit' 'degC' } RELABEL
+  $currentTime 
+    NaN NaN NaN  // no gps location
+    $value "present-value" GET TODOUBLE 
+  ADDVALUE 'gts' STORE
+
+  $gtsList $gts + DROP // add to list
+%>
+FOREACH
+
+// update with a valid write token from your instance...
+$gtsList
+"VxOsDUqN6U8lU8dUgURm4bC7cGw4Z6DgkQ41TTcHZtG0ItBUSsTwxYCGJSYRsoPrupdlxFbXO9jxDxZRBrsyg0N0Su2S8HAEQqObLL45.YWAxe628qOSRbMjHvEtKlwQ"
+UPDATE
+

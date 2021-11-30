@@ -1,4 +1,4 @@
-package fr.couincouin;
+package io.warp10.plugins.bacnet;
 
 
 import java.io.IOException;

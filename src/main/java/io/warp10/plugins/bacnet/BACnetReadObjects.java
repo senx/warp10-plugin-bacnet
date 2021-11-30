@@ -1,4 +1,4 @@
-package fr.couincouin;
+package io.warp10.plugins.bacnet;
 
 import com.serotonin.bacnet4j.RemoteDevice;
 import io.warp10.script.NamedWarpScriptFunction;

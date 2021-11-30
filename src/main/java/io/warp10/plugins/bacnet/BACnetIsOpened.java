@@ -1,4 +1,4 @@
-package fr.couincouin;
+package io.warp10.plugins.bacnet;
 
 import io.warp10.script.NamedWarpScriptFunction;
 import io.warp10.script.WarpScriptException;

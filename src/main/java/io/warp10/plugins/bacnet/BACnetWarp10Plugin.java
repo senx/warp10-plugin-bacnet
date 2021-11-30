@@ -1,4 +1,4 @@
-package fr.couincouin;
+package io.warp10.plugins.bacnet;
 
 import com.serotonin.bacnet4j.LocalDevice;
 import com.serotonin.bacnet4j.RemoteDevice;
@@ -48,7 +48,10 @@ public class BACnetWarp10Plugin extends AbstractWarp10Plugin implements Runnable
   private int parity;
 
   public void openLocalDevice(String serialPort, int baudRate, int dataBits, int stopBits, int parity) throws WarpScriptException {
-
+    closeAll();
+    if (!Arrays.asList(SerialPortList.getPortNames()).contains(serialPort)) {
+      throw new WarpScriptException(serialPort + " is not a serial port");
+    }
     this.bacnetSerialPort = new SerialPort(serialPort);
     boolean b;
     try {
