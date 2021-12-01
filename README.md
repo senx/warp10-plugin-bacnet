@@ -8,6 +8,9 @@ Behind the hood, it uses BACnet4J (GPL licence), so this plugin is also released
 There is very very very few documentation for BACnet4J, so the code is 
 based on these examples: [1](https://github.com/MangoAutomation/BACnet4J/blob/master/src/test/java/com/serotonin/bacnet4j/adhoc/rs485/MasterTest.java) 
 [2](https://gist.github.com/splatch/3216feba4bcad3cfd741644552f93870).
+If you're looking for BACnet4J resources, you can also consider 
+[this wrapper](https://github.com/Code-House/bacnet4j-wrapper/blob/1.2.x/README.md).
+Because BACnet4J is so painful it needs a wrapper...
 
 ## Capabilities and limitations
 The plugin is designed to handle only one MS/TP BACNet port for the moment.
@@ -19,8 +22,9 @@ port is opened (with `BACnetIsOpened`), you will close and re-initialize the por
 
 Feel free to contribute to add multiple networks or BACnet over IP!
 
-## Code example
+## Code examples
 
+Open port, read parameters.
 ```warpscript
 // @endpoint http://localhost:8080/api/v0/exec
 
@@ -53,6 +57,23 @@ $remoteDevice
 } $showAllBacnetProperties  BACnetReadObjects
 
 ```
+Example to write parameters:
+```warpscript
+// set AV60 to 1.0
+  $remoteDevice
+    "analogValue" 60 BACnetBuildObjectId 
+    1.0  
+  BACnetWriteObjects
+
+// set MV2 to 2
+  $remoteDevice
+    "multiStateValue" 2 BACnetBuildObjectId  
+    2
+  BACnetWriteObjects
+```
+
+Check examples folder for more.
+
 
 ## Compile and deploy
 

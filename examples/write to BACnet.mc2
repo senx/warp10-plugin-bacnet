@@ -1,0 +1,41 @@
+// @endpoint http://localhost:8080/api/v0/exec
+
+BACnetIsOpened ! // check if not already opened...
+<% 
+  {
+    'port' '/dev/ttyUSB1'
+    'baudrate' 19200
+    'databits' 8
+    'stopbits' 1
+    'parity' 'none'
+  } BACnetOpenLocalDevice   // do not returns anything. Only one MS/TP network is supported. 
+                            // Feel free to contribute for multiple ports or IP :)
+%> IFT
+
+// note : if the port is unplugged, it will be detected and safely closed within 10 seconds
+// by the plugin.
+
+// open device #620001  with a 15000 millisecond timeout
+620001 15000 BACnetOpenRemoteDevice  'remoteDevice' STORE
+// the first call to BACnetOpenRemoteDevice is long and may fail. 
+// following calls to BACnetOpenRemoteDevice use a cache.
+
+
+// read MV2 and AV60
+$remoteDevice
+{
+  "TypeAssemblageUnit"           "multiStateValue" 2 BACnetBuildObjectId     
+  "delaiAntiCyclePAC"           "analogValue" 60 BACnetBuildObjectId     
+} BACnetReadObjects  
+
+// set AV60 to 1.0
+ $remoteDevice
+"analogValue" 60 BACnetBuildObjectId 
+ 1.0  BACnetWriteObjects
+
+ 
+// set MV2 to 2
+ $remoteDevice
+"multiStateValue" 2 BACnetBuildObjectId  
+ 2 BACnetWriteObjects
+

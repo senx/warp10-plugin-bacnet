@@ -8,15 +8,22 @@ import com.serotonin.bacnet4j.npdu.mstp.MasterNode;
 import com.serotonin.bacnet4j.npdu.mstp.MstpNetwork;
 import com.serotonin.bacnet4j.service.acknowledgement.ReadPropertyMultipleAck;
 import com.serotonin.bacnet4j.service.confirmed.ReadPropertyMultipleRequest;
+import com.serotonin.bacnet4j.service.confirmed.WritePropertyMultipleRequest;
+import com.serotonin.bacnet4j.service.confirmed.WritePropertyRequest;
 import com.serotonin.bacnet4j.transport.DefaultTransport;
 import com.serotonin.bacnet4j.transport.Transport;
+import com.serotonin.bacnet4j.type.Encodable;
+import com.serotonin.bacnet4j.type.constructed.PropertyValue;
 import com.serotonin.bacnet4j.type.constructed.ReadAccessResult;
 import com.serotonin.bacnet4j.type.constructed.ReadAccessSpecification;
 import com.serotonin.bacnet4j.type.constructed.SequenceOf;
+import com.serotonin.bacnet4j.type.constructed.WriteAccessSpecification;
 import com.serotonin.bacnet4j.type.enumerated.ObjectType;
 import com.serotonin.bacnet4j.type.enumerated.PropertyIdentifier;
 import com.serotonin.bacnet4j.type.primitive.CharacterString;
 import com.serotonin.bacnet4j.type.primitive.ObjectIdentifier;
+
+
 import io.warp10.script.WarpScriptException;
 import io.warp10.script.WarpScriptLib;
 import io.warp10.warp.sdk.AbstractWarp10Plugin;
@@ -30,6 +37,7 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.concurrent.locks.LockSupport;
 
@@ -139,6 +147,30 @@ public class BACnetWarp10Plugin extends AbstractWarp10Plugin implements Runnable
           "(binary|analog|multiState)+(Input|Output|Value) " +
           "ie : analogOutput, binaryInput, multiStateValue...");
     }
+  }
+
+  public void writeRemoteDevice(RemoteDevice remoteDevice, ObjectIdentifier id, Object value) throws WarpScriptException {
+
+    // build a value compatible for Bacnet
+    Encodable bacNetValue;
+    if (value instanceof Long) {
+      bacNetValue = new com.serotonin.bacnet4j.type.primitive.UnsignedInteger((Long) value);
+    } else if (value instanceof Double) {
+      bacNetValue = new com.serotonin.bacnet4j.type.primitive.Real(((Double) value).floatValue());
+    } else {
+      throw new WarpScriptException(" supports only Double or Long write");
+    }
+
+    WritePropertyRequest wp = new WritePropertyRequest(id, PropertyIdentifier.presentValue, null,
+        bacNetValue, new com.serotonin.bacnet4j.type.primitive.UnsignedInteger(0));
+
+    try {
+      this.localDevice.send(remoteDevice, wp).get();
+    } catch (Exception e) {
+      throw new WarpScriptException(e);
+    }
+
+
   }
 
   public Map readRemoteDevice(RemoteDevice remoteDevice, Map<String, ObjectIdentifier> objMap, boolean valueOnly) throws WarpScriptException {
@@ -252,6 +284,7 @@ public class BACnetWarp10Plugin extends AbstractWarp10Plugin implements Runnable
     WarpScriptLib.addNamedWarpScriptFunction(new BACnetOpenRemoteDevice("BACnetOpenRemoteDevice", this));
     WarpScriptLib.addNamedWarpScriptFunction(new BACnetBuildObjectId("BACnetBuildObjectId", this));
     WarpScriptLib.addNamedWarpScriptFunction(new BACnetReadObjects("BACnetReadObjects", this));
+    WarpScriptLib.addNamedWarpScriptFunction(new BACnetWriteObjects("BACnetWriteObjects", this));
 
     Runtime.getRuntime().addShutdownHook(new Thread() {
       @Override
@@ -283,5 +316,5 @@ public class BACnetWarp10Plugin extends AbstractWarp10Plugin implements Runnable
       }
     }
   }
-  
+
 }
