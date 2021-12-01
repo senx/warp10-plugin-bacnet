@@ -27,8 +27,8 @@ public class BACnetWriteObjects extends NamedWarpScriptFunction implements WarpS
     
     Object v = stack.pop();
     boolean isDouble =Double.class.isAssignableFrom(v.getClass()) || Float.class.isAssignableFrom(v.getClass()) || BigDecimal.class.isAssignableFrom(v.getClass());
-    if (!(isDouble || v instanceof Long)) {
-      throw new WarpScriptException(this.getName() + " only support Long and Double values");
+    if (!(isDouble || v instanceof Long || v instanceof Boolean)) {
+      throw new WarpScriptException(this.getName() + " only support Boolean, Long or Double values");
     }  
     
     Object o = stack.pop();

@@ -29,13 +29,19 @@ $remoteDevice
 } BACnetReadObjects  
 
 // set AV60 to 1.0
- $remoteDevice
-"analogValue" 60 BACnetBuildObjectId 
- 1.0  BACnetWriteObjects
-
+$remoteDevice
+  "analogValue" 60 BACnetBuildObjectId 
+  1.0  
+BACnetWriteObjects
  
 // set MV2 to 2
- $remoteDevice
-"multiStateValue" 2 BACnetBuildObjectId  
- 2 BACnetWriteObjects
+$remoteDevice
+  "multiStateValue" 2 BACnetBuildObjectId  
+  2 
+BACnetWriteObjects
 
+// set BV 1107 to inactive
+$remoteDevice
+  "binaryValue" 1107 BACnetBuildObjectId 
+  false
+BACnetWriteObjects

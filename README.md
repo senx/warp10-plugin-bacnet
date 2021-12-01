@@ -70,6 +70,12 @@ Example to write parameters:
     "multiStateValue" 2 BACnetBuildObjectId  
     2
   BACnetWriteObjects
+  
+// set BV 1107 to inactive
+$remoteDevice
+  "binaryValue" 1107 BACnetBuildObjectId 
+  false
+BACnetWriteObjects
 ```
 
 Check examples folder for more.
