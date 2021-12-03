@@ -20,6 +20,9 @@ import com.serotonin.bacnet4j.type.enumerated.ObjectType;
 import com.serotonin.bacnet4j.type.enumerated.PropertyIdentifier;
 import com.serotonin.bacnet4j.type.primitive.CharacterString;
 import com.serotonin.bacnet4j.type.primitive.ObjectIdentifier;
+
+import java.util.regex.Pattern;
+
 import io.warp10.script.WarpScriptException;
 import io.warp10.script.WarpScriptLib;
 import io.warp10.warp.sdk.AbstractWarp10Plugin;
@@ -50,10 +53,12 @@ public class BACnetWarp10Plugin extends AbstractWarp10Plugin implements Runnable
   private int stopBits;
   private int parity;
 
+  private static final String SERIAL_PORT_PATTERN = "(ttyS|ttyUSB|ttyACM|ttyAMA|rfcomm|ttymxc)[0-9]{1,3}";
+
   public void openLocalDevice(String serialPort, int baudRate, int dataBits, int stopBits, int parity) throws WarpScriptException {
     closeAll();
-    if (!Arrays.asList(SerialPortList.getPortNames()).contains(serialPort)) {
-      throw new WarpScriptException(serialPort + " is not a serial port");
+    if (!Arrays.asList(SerialPortList.getPortNames(Pattern.compile(SERIAL_PORT_PATTERN))).contains(bacnetSerialPort.getPortName())) {
+      throw new WarpScriptException(serialPort + " is not a serial port"); // (/dev/ttymxc0 is not a serial port)) WHAT ???? 
     }
     this.bacnetSerialPort = new SerialPort(serialPort);
     boolean b;
@@ -306,7 +311,7 @@ public class BACnetWarp10Plugin extends AbstractWarp10Plugin implements Runnable
     while (true) {
       LockSupport.parkNanos(10000 * 1000000L);
       if (bacnetSerialPort != null) {
-        if (!Arrays.asList(SerialPortList.getPortNames()).contains(bacnetSerialPort.getPortName())) {
+        if (!Arrays.asList(SerialPortList.getPortNames(Pattern.compile(SERIAL_PORT_PATTERN))).contains(bacnetSerialPort.getPortName())) {
           System.out.println("Bacnet: serial port " + bacnetSerialPort.getPortName() + " do not exist anymore on the system ! Force closing");
           closeAll();
         }
