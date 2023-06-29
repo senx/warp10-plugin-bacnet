@@ -1,5 +1,5 @@
 //
-//   Copyright 2019 - 2021  SenX S.A.S.
+//   Copyright 2019 - 2023  SenX S.A.S.
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -19,22 +19,19 @@ plugins {
   id 'maven-publish'
   id 'signing'
   id 'com.github.johnrengelman.shadow' version '7.0.0'
-  id 'net.nemerosa.versioning' version '2.14.0'
   id 'io.github.gradle-nexus.publish-plugin' version '1.1.0'
 }
 
 project.group = 'io.warp10.plugins'
 project.description = 'BACNet plugin for Warp 10'
 
-// If the current tag is set, then it's a new release. Don't add build number
-project.version = versioning.info.lastTag + ((versioning.info.tag != null) ? '' : '-' + versioning.info.build)
+project.version = getVersionFromGit()
 
 //
 // Repositories for the project dependencies
 //
 
-repositories {
-  mavenCentral()
+repositories {  mavenCentral()
   maven {
     url "https://maven.mangoautomation.net/repository/ias-release"
   }
@@ -160,5 +157,21 @@ if (project.hasProperty("signing.gnupg.keyName")) {
   signing {
     useGpgCmd()
     sign publishing.publications
+  }
+}
+
+
+def getVersionFromGit() {
+  def nogit = System.getProperty("nogit")
+  if (null != nogit) {
+    // Override version with the property value. To remove the version altogether use '-Dnogit' without value.
+    return nogit
+  } else {
+    def stdout = new ByteArrayOutputStream()
+    exec {
+      commandLine 'git', 'describe', '--tags', '--always'
+      standardOutput = stdout
+    }
+    return stdout.toString().trim()
   }
 }
