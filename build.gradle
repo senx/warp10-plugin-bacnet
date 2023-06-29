@@ -31,8 +31,7 @@ project.version = getVersionFromGit()
 // Repositories for the project dependencies
 //
 
-repositories {
-  mavenCentral()
+repositories {  mavenCentral()
   maven {
     url "https://maven.mangoautomation.net/repository/ias-release"
   }
